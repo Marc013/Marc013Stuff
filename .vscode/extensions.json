@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "msazurermtools.azurerm-vscode-tools",
+    "ms-azure-devops.azure-pipelines",
+    "editorconfig.editorconfig",
+    "redhat.vscode-yaml",
+    "davidanson.vscode-markdownlint",
+    "simonguo.vscode-markdown-table-sort"
+  ],
+  "unwantedRecommendations": []
+}

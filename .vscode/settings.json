@@ -1,0 +1,38 @@
+{
+  "azure.cloud": "AzureCloud",
+  "editor.formatOnSave": true,
+  "editor.renderWhitespace": "all",
+  "files.associations": {
+    "**/pipelines/*.yaml": "azure-pipelines",
+    "**/pipelines/*.yml": "azure-pipelines",
+    "**/development/*.yaml": "azure-pipelines",
+    "**/development/*.yml": "azure-pipelines"
+  },
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.trimTrailingWhitespace": true,
+  "json.schemas": [
+    {
+      "fileMatch": ["**/task.json"],
+      "url": "https://raw.githubusercontent.com/microsoft/azure-pipelines-task-lib/master/tasks.schema.json"
+    },
+    {
+      "fileMatch": ["**/vss-extension.json"],
+      "url": "http://json.schemastore.org/vss-extension"
+    }
+  ],
+  "markdownlint.config": {
+    "MD007": {
+      "indent": 4
+    },
+    "MD025": false
+  },
+  "yaml.schemaStore.enable": true,
+  "[azure-pipelines]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+    "files.trimTrailingWhitespace": false
+  }
+}

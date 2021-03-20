@@ -1,0 +1,54 @@
+{
+  "directories": [
+    {
+      "directory": {
+        "files": [
+          "file1.txt",
+          "file2.txt"
+        ]
+      }
+    },
+    {
+      "directory": {
+        "name": "level1a",
+        "files": [
+          "file3.txt"
+        ],
+        "directories": [
+          {
+            "directory": {
+              "name": "level2a",
+              "files": [
+                "file4.txt"
+              ]
+            }
+          },
+          {
+            "directory": {
+              "name": "level2b",
+              "directories": [
+                {
+                  "directory": {
+                    "name": "level3a",
+                    "files": [
+                      "file5.txt"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "directory": {
+        "name": "level1b",
+        "files": [
+          "file6.txt",
+          "file7.txt"
+        ]
+      }
+    }
+  ]
+}
