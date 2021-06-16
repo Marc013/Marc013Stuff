@@ -5,7 +5,18 @@ function New-UnitTestReport {
     .DESCRIPTION
 
     .EXAMPLE
+    $Param = @{
+        Path                = 'C:\git\BB-StorageAccount\tests'\
+        ScriptPath          = 'C:\git\BB-StorageAccount\modules\CCC.StorageAccount\private\*.ps1', 'C:\git\BB-StorageAccount\modules\CCC.StorageAccount\public\*.ps1'
+        ReportUnitPath      = 'C:\ReportUnit\ReportUnit.exe'
+        ReportGeneratorPath = 'C:\ReportGenerator\ReportGenerator.exe'
+        ReportType          = 'HtmlInline_AzurePipelines', 'HtmlInline_AzurePipelines_Dark'
+        ReportTitle         = 'Nice Stuff!!'
+        ShowReport          = $true
+    }
+    New-UnitTestReport @Param
 
+    This command will . . .
     #>
     [CmdletBinding()]
     param (
@@ -19,8 +30,12 @@ function New-UnitTestReport {
         [array]$ScriptPath,
         [Parameter(
             Mandatory = $true,
+            HelpMessage = 'Full path of ReportUnit.exe. (e.g. "C:\ReportUnit\ReportUnit.exe")')]
+        [string]$ReportUnitPath,
+        [Parameter(
+            Mandatory = $true,
             HelpMessage = 'Full path of ReportGenerator.exe. (e.g. "C:\ReportGenerator\ReportGenerator.exe")')]
-        [array]$ReportGeneratorPath,
+        [string]$ReportGeneratorPath,
         [Parameter(
             Mandatory = $false,
             HelpMessage = 'Code coverage output format and scope.')]
@@ -49,8 +64,10 @@ function New-UnitTestReport {
         throw "`nUnable to find ReportGenerator.exe. `nPlease make sure ReportGenerator.exe is installed. `nhttps://danielpalme.github.io/ReportGenerator/"
     }
 
-    # Create code coverage JaCoCo XML report
-    # Import-Module -Name Pester
+    # Run Pester test
+
+    ### ToDo: Specify report output directory path. Create path if not exist including dir for test results and code coverage
+    ### E.g. c:\testResults\unitTest\ & c:\testResults\codeCoverage\
 
     $CodeCoverageOutputPath = "$Path/coverage.xml"
     $TestResultOutputPath = "$Path/testResults.xml"
@@ -71,6 +88,9 @@ function New-UnitTestReport {
     try {
         Invoke-Pester -Configuration $configuration
 
+        # Generating unit tests report
+        & $ReportUnitPath $TestResultOutputPath | Out-String | Out-Null ### ToDo: Add report destinatino path
+
         # Generating code coverage report
         if ($ReportType.Contains('HtmlInline_AzurePipelines') -and $ReportType.Contains('HtmlInline_AzurePipelines_Dark')) {
             Write-Warning "You specified report type 'HtmlInline_AzurePipelines' and 'HtmlInline_AzurePipelines_Dark'. `nOnly one of these report types can be created at one time. `nRemoving report type 'HtmlInline_AzurePipelines_Dark'`n"
@@ -81,12 +101,15 @@ function New-UnitTestReport {
         [string]$ReportType = Join-String -InputObject $ReportType -Separator ';'
         [string]$SourceDirs = $ScriptPath.TrimEnd('*.ps1') | Join-String -Separator ';'
 
-        $Result = & $ReportGeneratorPath -reports:$CodeCoverageOutputPath -targetdir:$CoverageReportDir -sourcedirs:$SourceDirs -reporttypes:$ReportType -title:$ReportTitle | Out-String
+        $CodeCoverageResult = & $ReportGeneratorPath -reports:$CodeCoverageOutputPath -targetdir:$CoverageReportDir -sourcedirs:$SourceDirs -reporttypes:$ReportType -title:$ReportTitle | Out-String
         # $Result
 
         if ($ShowReport.IsPresent) {
             $DirSeparator = [IO.Path]::DirectorySeparatorChar
-            foreach ($Entry in $Result.Split(':')) {
+
+            #&
+
+            foreach ($Entry in $CodeCoverageResult.Split(':')) {
                 if ($Entry -match 'Writing report file') {
                     [string]$Report = $Entry.Split("'")[1].Split("$DirSeparator")[-1]
                     Write-Host "Operning Report '$CoverageReportDir$DirSeparator$Report'" -ForegroundColor Magenta
