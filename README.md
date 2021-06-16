@@ -13,6 +13,6 @@ PowerShell module with all kinds of miscellaneous goodies
     * PowerShell module [Pester][2]
     * Daniel Palme's [ReportGenerator][3]
 
-[1]: https://github.com/Marc013/Marc013Stuff/blob/main/Example/ExampleDirectoryStructure.json{:target="_blank"}
-[2]: https://www.powershellgallery.com/packages/Pester{:target="_blank"}
-[3]: https://danielpalme.github.io/ReportGenerator/{:target="_blank"}
+[1]: https://github.com/Marc013/Marc013Stuff/blob/main/Example/ExampleDirectoryStructure.json
+[2]: https://www.powershellgallery.com/packages/Pester
+[3]: https://danielpalme.github.io/ReportGenerator/
