@@ -6,8 +6,8 @@ function New-UnitTestReport {
 
     .EXAMPLE
     $Param = @{
-        Path                = 'C:\git\BB-StorageAccount\tests'\
-        ScriptPath          = 'C:\git\BB-StorageAccount\modules\CCC.StorageAccount\private\*.ps1', 'C:\git\BB-StorageAccount\modules\CCC.StorageAccount\public\*.ps1'
+        Path                = 'C:\git\FancyStuff\tests'\
+        ScriptPath          = 'C:\git\FancyStuff\modules\LazyGuy\private\*.ps1', 'C:\git\FancyStuff\modules\LazyGuy\public\*.ps1'
         ReportUnitPath      = 'C:\ReportUnit\ReportUnit.exe'
         ReportGeneratorPath = 'C:\ReportGenerator\ReportGenerator.exe'
         ReportType          = 'HtmlInline_AzurePipelines', 'HtmlInline_AzurePipelines_Dark'
