@@ -6,7 +6,7 @@ function New-UnitTestReport {
 
     .EXAMPLE
     $Param = @{
-        Path                = 'C:\git\FancyStuff\tests'\
+        Path                = 'C:\git\FancyStuff\tests'
         ScriptPath          = 'C:\git\FancyStuff\modules\LazyGuy\private\*.ps1', 'C:\git\FancyStuff\modules\LazyGuy\public\*.ps1'
         ReportUnitPath      = 'C:\ReportUnit\ReportUnit.exe'
         ReportGeneratorPath = 'C:\ReportGenerator\ReportGenerator.exe'
@@ -16,7 +16,21 @@ function New-UnitTestReport {
     }
     New-UnitTestReport @Param
 
-    This command will . . .
+    This command will generate an HTML NUnit unit test report and an HTML inline Azure pipelines code coverage report.
+    Using paramter ReportUnitPath and ReportGeneratorPath you have specified the directory location of the respective executables.
+
+    .EXAMPLE
+    $Param = @{
+        Path        = 'C:\git\FancyStuff\tests'
+        ScriptPath  = 'C:\git\FancyStuff\modules\LazyGuy\private\*.ps1'
+        ReportType  = 'HtmlInline_AzurePipelines'
+        ReportTitle = 'Nice Stuff!!'
+        ShowReport  = $true
+    }
+    New-UnitTestReport @Param
+
+    This command will generate an HTML NUnit unit test report and an HTML inline Azure pipelines code coverage report.
+    The directory location(s) of the 'ReportUnit' executable and 'ReportGenerator' executable must be added to your system path!
     #>
     [CmdletBinding()]
     param (
@@ -29,13 +43,13 @@ function New-UnitTestReport {
             HelpMessage = 'Directorie where the scripts are located for code coverage.')]
         [array]$ScriptPath,
         [Parameter(
-            Mandatory = $true,
+            Mandatory = $false,
             HelpMessage = 'Full path of ReportUnit.exe. (e.g. "C:\ReportUnit\ReportUnit.exe")')]
-        [string]$ReportUnitPath,
+        [string]$ReportUnitPath = 'ReportUnit',
         [Parameter(
-            Mandatory = $true,
+            Mandatory = $false,
             HelpMessage = 'Full path of ReportGenerator.exe. (e.g. "C:\ReportGenerator\ReportGenerator.exe")')]
-        [string]$ReportGeneratorPath,
+        [string]$ReportGeneratorPath = 'ReportGenerator',
         [Parameter(
             Mandatory = $false,
             HelpMessage = 'Code coverage output format and scope.')]
@@ -43,7 +57,7 @@ function New-UnitTestReport {
             'HtmlInline', 'HtmlInline_AzurePipelines', 'HtmlInline_AzurePipelines_Dark',
             'HtmlSummary', 'JsonSummary', 'Latex', 'LatexSummary', 'lcov', 'MHtml',
             'PngChart', 'SonarQube', 'TeamCitySummary', 'TextSummary', 'Xml', 'XmlSummary')]
-        [System.Collections.ArrayList]$ReportType = 'Html',
+        [string[]]$ReportType = 'Html',
         [Parameter(
             Mandatory = $false,
             HelpMessage = 'Title of the code coverage report.')]
@@ -92,7 +106,8 @@ function New-UnitTestReport {
         & $ReportUnitPath $TestResultOutputPath | Out-String | Out-Null ### ToDo: Add report destinatino path
 
         # Generating code coverage report
-        if ($ReportType.Contains('HtmlInline_AzurePipelines') -and $ReportType.Contains('HtmlInline_AzurePipelines_Dark')) {
+        if ($ReportType.ToLower().Contains('htmlinline_azurepipelines') -and $ReportType.ToLower().Contains('htmlinline_azurepipelines_dark')) {
+            [System.Collections.ArrayList]$ReportType = $ReportType
             Write-Warning "You specified report type 'HtmlInline_AzurePipelines' and 'HtmlInline_AzurePipelines_Dark'. `nOnly one of these report types can be created at one time. `nRemoving report type 'HtmlInline_AzurePipelines_Dark'`n"
             $ReportType.Remove('HtmlInline_AzurePipelines_Dark')
         }
@@ -112,7 +127,7 @@ function New-UnitTestReport {
             foreach ($Entry in $CodeCoverageResult.Split(':')) {
                 if ($Entry -match 'Writing report file') {
                     [string]$Report = $Entry.Split("'")[1].Split("$DirSeparator")[-1]
-                    Write-Host "Operning Report '$CoverageReportDir$DirSeparator$Report'" -ForegroundColor Magenta
+                    Write-Host "Opening Report '$CoverageReportDir$DirSeparator$Report'" -ForegroundColor Magenta
 
                     & $CoverageReportDir$DirSeparator$Report
                 }
