@@ -57,7 +57,8 @@ function New-UnitTestReport {
 
     $ErrorPrefernce = $ErrorActionPreference
     $ErrorActionPreference = 'SilentlyContinue'
-    $AssertReportGenerator = & $ReportGeneratorPath /?
+    #$AssertReportGenerator = & $ReportGeneratorPath /?
+    $AssertReportGenerator = 'Skipping this test for troubleshooting purposes'
     $ErrorActionPreference = $ErrorPrefernce
 
     if ([string]::IsNullOrWhiteSpace($AssertReportGenerator)) {
@@ -87,37 +88,37 @@ function New-UnitTestReport {
 
     try {
         Invoke-Pester -Configuration $configuration
+        # ## Blocking the code for troubleshooting purposes ##
+        # # Generating unit tests report
+        # & $ReportUnitPath $TestResultOutputPath | Out-String | Out-Null ### ToDo: Add report destinatino path
 
-        # Generating unit tests report
-        & $ReportUnitPath $TestResultOutputPath | Out-String | Out-Null ### ToDo: Add report destinatino path
+        # # Generating code coverage report
+        # if ($ReportType.Contains('HtmlInline_AzurePipelines') -and $ReportType.Contains('HtmlInline_AzurePipelines_Dark')) {
+        #     Write-Warning "You specified report type 'HtmlInline_AzurePipelines' and 'HtmlInline_AzurePipelines_Dark'. `nOnly one of these report types can be created at one time. `nRemoving report type 'HtmlInline_AzurePipelines_Dark'`n"
+        #     $ReportType.Remove('HtmlInline_AzurePipelines_Dark')
+        # }
 
-        # Generating code coverage report
-        if ($ReportType.Contains('HtmlInline_AzurePipelines') -and $ReportType.Contains('HtmlInline_AzurePipelines_Dark')) {
-            Write-Warning "You specified report type 'HtmlInline_AzurePipelines' and 'HtmlInline_AzurePipelines_Dark'. `nOnly one of these report types can be created at one time. `nRemoving report type 'HtmlInline_AzurePipelines_Dark'`n"
-            $ReportType.Remove('HtmlInline_AzurePipelines_Dark')
-        }
+        # [string]$CoverageReportDir = 'coveragereport'
+        # [string]$ReportType = Join-String -InputObject $ReportType -Separator ';'
+        # [string]$SourceDirs = $ScriptPath.TrimEnd('*.ps1') | Join-String -Separator ';'
 
-        [string]$CoverageReportDir = 'coveragereport'
-        [string]$ReportType = Join-String -InputObject $ReportType -Separator ';'
-        [string]$SourceDirs = $ScriptPath.TrimEnd('*.ps1') | Join-String -Separator ';'
+        # $CodeCoverageResult = & $ReportGeneratorPath -reports:$CodeCoverageOutputPath -targetdir:$CoverageReportDir -sourcedirs:$SourceDirs -reporttypes:$ReportType -title:$ReportTitle | Out-String
+        # # $Result
 
-        $CodeCoverageResult = & $ReportGeneratorPath -reports:$CodeCoverageOutputPath -targetdir:$CoverageReportDir -sourcedirs:$SourceDirs -reporttypes:$ReportType -title:$ReportTitle | Out-String
-        # $Result
+        # if ($ShowReport.IsPresent) {
+        #     $DirSeparator = [IO.Path]::DirectorySeparatorChar
 
-        if ($ShowReport.IsPresent) {
-            $DirSeparator = [IO.Path]::DirectorySeparatorChar
+        #     #&
 
-            #&
+        #     foreach ($Entry in $CodeCoverageResult.Split(':')) {
+        #         if ($Entry -match 'Writing report file') {
+        #             [string]$Report = $Entry.Split("'")[1].Split("$DirSeparator")[-1]
+        #             Write-Host "Operning Report '$CoverageReportDir$DirSeparator$Report'" -ForegroundColor Magenta
 
-            foreach ($Entry in $CodeCoverageResult.Split(':')) {
-                if ($Entry -match 'Writing report file') {
-                    [string]$Report = $Entry.Split("'")[1].Split("$DirSeparator")[-1]
-                    Write-Host "Operning Report '$CoverageReportDir$DirSeparator$Report'" -ForegroundColor Magenta
-
-                    & $CoverageReportDir$DirSeparator$Report
-                }
-            }
-        }
+        #             & $CoverageReportDir$DirSeparator$Report
+        #         }
+        #     }
+        # }
     }
     finally {
         Remove-Item -LiteralPath $CodeCoverageOutputPath -Force -ErrorAction SilentlyContinue
