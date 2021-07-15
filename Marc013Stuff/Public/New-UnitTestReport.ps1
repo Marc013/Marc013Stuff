@@ -5,8 +5,13 @@ function New-UnitTestReport {
     .DESCRIPTION
 
     .EXAMPLE
+    New-UnitTestReport -TestsPath C:\git\FancyStuff\tests -ScriptPath C:\git\FancyStuff\modules\LazyGuy\public\*.ps1
+
+    This command will generate a HTML unit test report and HTML code coverage report in the directory provided in parameter TestsPath.
+
+    .EXAMPLE
     $Param = @{
-        Path                = 'C:\git\FancyStuff\tests'
+        TestsPath           = 'C:\git\FancyStuff\tests'
         ScriptPath          = 'C:\git\FancyStuff\modules\LazyGuy\private\*.ps1', 'C:\git\FancyStuff\modules\LazyGuy\public\*.ps1'
         ReportUnitPath      = 'C:\ReportUnit\ReportUnit.exe'
         ReportGeneratorPath = 'C:\ReportGenerator\ReportGenerator.exe'
@@ -21,7 +26,7 @@ function New-UnitTestReport {
 
     .EXAMPLE
     $Param = @{
-        Path        = 'C:\git\FancyStuff\tests'
+        TestsPath   = 'C:\git\FancyStuff\tests'
         ScriptPath  = 'C:\git\FancyStuff\modules\LazyGuy\private\*.ps1'
         ReportType  = 'HtmlInline_AzurePipelines'
         ReportTitle = 'Nice Stuff!!'
@@ -31,13 +36,20 @@ function New-UnitTestReport {
 
     This command will generate an HTML NUnit unit test report and an HTML inline Azure pipelines code coverage report.
     The directory location(s) of the 'ReportUnit' executable and 'ReportGenerator' executable must be added to your system path!
+
+    .LINK
+    ReportUnit
+    https://www.nuget.org/packages/ReportUnit
+
+    ReportGenerator
+    https://danielpalme.github.io/ReportGenerator
     #>
     [CmdletBinding()]
     param (
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'Directories to be searched for tests, paths directly to test files, or combination of both.')]
-        [string]$Path,
+        [string]$TestsPath,
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'Directorie where the scripts are located for code coverage.')]
@@ -69,25 +81,25 @@ function New-UnitTestReport {
     )
     #Requires -Modules @{ ModuleName='Pester'; ModuleVersion='5.2.2' }
 
-    $ErrorPrefernce = $ErrorActionPreference
-    $ErrorActionPreference = 'SilentlyContinue'
-    $AssertReportGenerator = & $ReportGeneratorPath /?
-    $ErrorActionPreference = $ErrorPrefernce
+    Assert-HelperFunction
 
-    if ([string]::IsNullOrWhiteSpace($AssertReportGenerator)) {
-        throw "`nUnable to find ReportGenerator.exe. `nPlease make sure ReportGenerator.exe is installed. `nhttps://danielpalme.github.io/ReportGenerator/"
-    }
+    Assert-Executable -Executable $ReportUnitPath
+    Assert-Executable -Executable $ReportGeneratorPath
 
     # Run Pester test
 
-    ### ToDo: Specify report output directory path. Create path if not exist including dir for test results and code coverage
-    ### E.g. c:\testResults\unitTest\ & c:\testResults\codeCoverage\
+    ### ToDo: Add history results to report when present
 
-    $CodeCoverageOutputPath = "$Path/coverage.xml"
-    $TestResultOutputPath = "$Path/testResults.xml"
+    New-Item -Path $TestsPath -Name report -ItemType Directory -Force | Out-Null
+
+    [char]$DirSeparator = [IO.Path]::DirectorySeparatorChar
+    [string]$Ticks = $(Get-Date).Ticks
+    [string]$ReportPath = "$TestsPath$($DirSeparator)report"
+    [string]$CodeCoverageOutputPath = "$ReportPath$($DirSeparator)coverage$Ticks.xml"
+    [string]$TestResultOutputPath = "$ReportPath$($DirSeparator)testResults$Ticks.xml"
 
     $configuration = New-PesterConfiguration
-    $configuration.Run.Path = $Path
+    $configuration.Run.Path = $TestsPath
     $configuration.Run.Exit = $true
     $configuration.Should.ErrorAction = 'Continue'
     $configuration.CodeCoverage.Enabled = $true
@@ -103,7 +115,7 @@ function New-UnitTestReport {
         Invoke-Pester -Configuration $configuration
 
         # Generating unit tests report
-        & $ReportUnitPath $TestResultOutputPath | Out-String | Out-Null ### ToDo: Add report destinatino path
+        & $ReportUnitPath $TestResultOutputPath | Out-Null ### ToDo: Add report destinatino path
 
         # Generating code coverage report
         if ($ReportType.ToLower().Contains('htmlinline_azurepipelines') -and $ReportType.ToLower().Contains('htmlinline_azurepipelines_dark')) {
@@ -112,30 +124,26 @@ function New-UnitTestReport {
             $ReportType.Remove('HtmlInline_AzurePipelines_Dark')
         }
 
-        [string]$CoverageReportDir = 'coveragereport'
         [string]$ReportType = Join-String -InputObject $ReportType -Separator ';'
         [string]$SourceDirs = $ScriptPath.TrimEnd('*.ps1') | Join-String -Separator ';'
 
-        $CodeCoverageResult = & $ReportGeneratorPath -reports:$CodeCoverageOutputPath -targetdir:$CoverageReportDir -sourcedirs:$SourceDirs -reporttypes:$ReportType -title:$ReportTitle | Out-String
-        # $Result
+        $CodeCoverageResult = & $ReportGeneratorPath -reports:$CodeCoverageOutputPath -targetdir:$ReportPath -sourcedirs:$SourceDirs -reporttypes:$ReportType -title:$ReportTitle | Out-String
 
         if ($ShowReport.IsPresent) {
-            $DirSeparator = [IO.Path]::DirectorySeparatorChar
-
-            #&
-
-            foreach ($Entry in $CodeCoverageResult.Split(':')) {
+            foreach ($Entry in $CodeCoverageResult.Split(': ')) {
                 if ($Entry -match 'Writing report file') {
                     [string]$Report = $Entry.Split("'")[1].Split("$DirSeparator")[-1]
-                    Write-Host "Opening Report '$CoverageReportDir$DirSeparator$Report'" -ForegroundColor Magenta
+                    [string]$ReportFullPath = "$ReportPath$DirSeparator$Report"
 
-                    & $CoverageReportDir$DirSeparator$Report
+                    Write-Host "`nOpening Report '$ReportFullPath"
+
+                    & $ReportFullPath
                 }
             }
         }
     }
     finally {
-        Remove-Item -LiteralPath $CodeCoverageOutputPath -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath $TestResultOutputPath -Force -ErrorAction SilentlyContinue
+        # Remove-Item -LiteralPath $CodeCoverageOutputPath -Force -ErrorAction SilentlyContinue # What About History?
+        # Remove-Item -LiteralPath $TestResultOutputPath -Force -ErrorAction SilentlyContinue # What About History?
     }
 }
