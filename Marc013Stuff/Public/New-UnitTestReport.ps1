@@ -86,36 +86,54 @@ function New-UnitTestReport {
     Assert-Executable -Executable $ReportUnitPath
     Assert-Executable -Executable $ReportGeneratorPath
 
-    # Run Pester test
-
-    ### ToDo: Add history results to report when present
-
-    New-Item -Path $TestsPath -Name report -ItemType Directory -Force | Out-Null
-
     [char]$DirSeparator = [IO.Path]::DirectorySeparatorChar
     [string]$Ticks = $(Get-Date).Ticks
-    [string]$ReportPath = "$TestsPath$($DirSeparator)report"
-    [string]$CodeCoverageOutputPath = "$ReportPath$($DirSeparator)coverage$Ticks.xml"
-    [string]$TestResultOutputPath = "$ReportPath$($DirSeparator)testResults$Ticks.xml"
 
-    $configuration = New-PesterConfiguration
-    $configuration.Run.Path = $TestsPath
-    $configuration.Run.Exit = $true
-    $configuration.Should.ErrorAction = 'Continue'
-    $configuration.CodeCoverage.Enabled = $true
-    $configuration.CodeCoverage.OutputFormat = 'JaCoCo'
-    $configuration.CodeCoverage.OutputPath = $CodeCoverageOutputPath
-    $configuration.CodeCoverage.Path = $ScriptPath
-    $configuration.TestResult.Enabled = $true
-    $configuration.TestResult.OutputFormat = 'NUnitXml'
-    $configuration.TestResult.OutputPath = $TestResultOutputPath
-    $configuration.Output.Verbosity = 'Detailed'
+    if ($TestsPath -match '.ps1') {
+        $TestFilePath = [System.IO.DirectoryInfo]$TestsPath
+        $BaseTestPath = $TestsPath.Replace($("$DirSeparator$($TestFilePath.BaseName)"), '')
+        [string]$ReportPath = "$BaseTestPath$($DirSeparator)report"
+    }
+    else {
+        [string]$ReportPath = "$TestsPath$($DirSeparator)report"
+    }
+
+    [string]$CodeCoverageBasePath = "$ReportPath$($DirSeparator)codeCoverage$DirSeparator"
+    [string]$CodeCoverageOutputPath = "$($CodeCoverageBasePath)coverage$Ticks.xml"
+    [string]$CodeCoverageHistoryPath = "$ReportPath$($DirSeparator)codeCoverageHistory"
+    [string]$TestResultBasePath = "$ReportPath$($DirSeparator)unitTest$DirSeparator"
+    [string]$TestResultOutputPath = "$($TestResultBasePath)testResults$Ticks.xml"
+
+    New-Item -Path $TestsPath -Name report -ItemType Directory -Force | Out-Null
+    New-Item -Path $CodeCoverageBasePath -ItemType Directory -Force | Out-Null
+    New-Item -Path $TestResultBasePath -ItemType Directory -Force | Out-Null
+
+    $Configuration = New-PesterConfiguration
+    $Configuration.Run.Path = $TestsPath
+    $Configuration.CodeCoverage.Enabled = $true
+    $Configuration.CodeCoverage.OutputPath = $CodeCoverageOutputPath
+    $Configuration.CodeCoverage.Path = $ScriptPath
+    $Configuration.TestResult.Enabled = $true
+    $Configuration.TestResult.OutputFormat = 'NUnitXml'
+    $Configuration.TestResult.OutputPath = $TestResultOutputPath
+    $Configuration.TestResult.TestSuiteName = 'MarvelIsBetterThanDC!'
+    $Configuration.Should.ErrorAction = 'Continue'
+    $Configuration.Output.Verbosity = 'Detailed'
+
+    Write-Host "Configuration.TestResult.TestSuiteName = '$($Configuration.TestResult.TestSuiteName)'" -ForegroundColor Black -BackgroundColor Yellow
 
     try {
-        Invoke-Pester -Configuration $configuration
+        Invoke-Pester -Configuration $Configuration
 
         # Generating unit tests report
-        & $ReportUnitPath $TestResultOutputPath | Out-Null ### ToDo: Add report destinatino path
+        & $ReportUnitPath $TestResultOutputPath | Out-Null
+
+        # TESTING extentreports-dotnet-cli which deprecates ReportUnit
+        # https://github.com/extent-framework/extentreports-dotnet-cli
+        Write-Host 'TESTING extentreports-dotnet-cli'
+        Write-Host "TestResultOutputPath = '$TestResultOutputPath'"
+        Write-Host "TestResultBasePath = '$TestResultBasePath'"
+        extent -d $TestResultBasePath -o $TestResultBasePath --merge
 
         # Generating code coverage report
         if ($ReportType.ToLower().Contains('htmlinline_azurepipelines') -and $ReportType.ToLower().Contains('htmlinline_azurepipelines_dark')) {
@@ -125,15 +143,26 @@ function New-UnitTestReport {
         }
 
         [string]$ReportType = Join-String -InputObject $ReportType -Separator ';'
-        [string]$SourceDirs = $ScriptPath.TrimEnd('*.ps1') | Join-String -Separator ';'
 
-        $CodeCoverageResult = & $ReportGeneratorPath -reports:$CodeCoverageOutputPath -targetdir:$ReportPath -sourcedirs:$SourceDirs -reporttypes:$ReportType -title:$ReportTitle | Out-String
+        foreach ($Path in $ScriptPath) {
+            if ($Path -match '.ps1') {
+                [array]$Dirs += $Path.Replace((([System.IO.DirectoryInfo]$Path).BaseName), '')
+            }
+            else {
+                [array]$Dirs += $Path
+            }
+        }
+        # [string]$SourceDirs = $ScriptPath.TrimEnd('*.ps1') | Join-String -Separator ';'
+        [string]$SourceDirs = Join-String -Separator ';' -InputObject $Dirs
+
+        Write-Host 'Generating code coverage report'
+        $CodeCoverageResult = & $ReportGeneratorPath -reports:$CodeCoverageOutputPath -targetdir:$CodeCoverageBasePath -sourcedirs:$SourceDirs -historydir:$CodeCoverageHistoryPath -reporttypes:$ReportType -title:$ReportTitle | Out-String
 
         if ($ShowReport.IsPresent) {
             foreach ($Entry in $CodeCoverageResult.Split(': ')) {
                 if ($Entry -match 'Writing report file') {
                     [string]$Report = $Entry.Split("'")[1].Split("$DirSeparator")[-1]
-                    [string]$ReportFullPath = "$ReportPath$DirSeparator$Report"
+                    [string]$ReportFullPath = "$CodeCoverageBasePath$DirSeparator$Report"
 
                     Write-Host "`nOpening Report '$ReportFullPath"
 
@@ -143,7 +172,7 @@ function New-UnitTestReport {
         }
     }
     finally {
-        # Remove-Item -LiteralPath $CodeCoverageOutputPath -Force -ErrorAction SilentlyContinue # What About History?
-        # Remove-Item -LiteralPath $TestResultOutputPath -Force -ErrorAction SilentlyContinue # What About History?
+        # Remove-Item -LiteralPath $CodeCoverageOutputPath -Force -ErrorAction SilentlyContinue
+        # Remove-Item -LiteralPath $TestResultOutputPath -Force -ErrorAction SilentlyContinue
     }
 }
