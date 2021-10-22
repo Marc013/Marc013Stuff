@@ -79,7 +79,7 @@ function New-UnitTestReport {
             HelpMessage = 'Open HTML report.')]
         [switch]$ShowReport
     )
-    #Requires -Modules @{ ModuleName='Pester'; ModuleVersion='5.2.2' }
+    #Requires -Modules @{ ModuleName='Pester'; ModuleVersion='5.3.0' }
 
     Assert-HelperFunction
 
@@ -116,11 +116,11 @@ function New-UnitTestReport {
     $Configuration.TestResult.Enabled = $true
     $Configuration.TestResult.OutputFormat = 'NUnitXml'
     $Configuration.TestResult.OutputPath = $TestResultOutputPath
-    $Configuration.TestResult.TestSuiteName = 'MarvelIsBetterThanDC!'
+    $Configuration.TestResult.TestSuiteName = $ReportTitle
     $Configuration.Should.ErrorAction = 'Continue'
     $Configuration.Output.Verbosity = 'Detailed'
 
-    Write-Host "Configuration.TestResult.TestSuiteName = '$($Configuration.TestResult.TestSuiteName)'" -ForegroundColor Black -BackgroundColor Yellow
+    # Write-Host "Configuration.TestResult.TestSuiteName = '$($Configuration.TestResult.TestSuiteName)'" -ForegroundColor Black -BackgroundColor Yellow
 
     try {
         Invoke-Pester -Configuration $Configuration
@@ -136,7 +136,7 @@ function New-UnitTestReport {
         extent -d $TestResultBasePath -o $TestResultBasePath --merge
 
         # Generating code coverage report
-        if ($ReportType.ToLower().Contains('htmlinline_azurepipelines') -and $ReportType.ToLower().Contains('htmlinline_azurepipelines_dark')) {
+        if ($ReportType.ToLower() -match '^htmlinline_azurepipelines$' -and $ReportType.ToLower() -match '^htmlinline_azurepipelines_dark$') {
             [System.Collections.ArrayList]$ReportType = $ReportType
             Write-Warning "You specified report type 'HtmlInline_AzurePipelines' and 'HtmlInline_AzurePipelines_Dark'. `nOnly one of these report types can be created at one time. `nRemoving report type 'HtmlInline_AzurePipelines_Dark'`n"
             $ReportType.Remove('HtmlInline_AzurePipelines_Dark')
