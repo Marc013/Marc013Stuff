@@ -13,7 +13,7 @@ function Assert-HelperFunction {
         $ExecutionContext.SessionState.Module
     }
     else {
-        Get-Module $ModuleName -All
+        Get-Module -Name $ModuleName -All
     }
 
     if ([string]::IsNullOrWhiteSpace($Module)) {
