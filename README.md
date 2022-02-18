@@ -4,13 +4,7 @@ PowerShell module with all kinds of miscellaneous goodies
 
 ## Functions
 
-### **Set-DirectoryStructure**
-
-  This function creates or updates the directory structure specified in the JSON directory structure template file or object.
-
-  A template example is available [here][1].
-
-### **New-UnitTestReport**
+### **New-CodeCoverageReport**
 
   Use this function to create a code coverage report using _Pester 5_ and _ReportGenerator_.
 
@@ -42,6 +36,12 @@ Add `C:\ReportGenerator` to environment variable `Path`.
 > _Code coverage details:_
 > 
 > ![Screenshot showing coverage details.](media/codeCoverageDetails.png)
+
+### **Set-DirectoryStructure**
+
+  This function creates or updates the directory structure specified in the JSON directory structure template file or object.
+
+  A template example is available [here][1].
 
 [1]: https://github.com/Marc013/Marc013Stuff/blob/main/Example/ExampleDirectoryStructure.json
 [2]: https://www.powershellgallery.com/packages/Pester
