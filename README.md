@@ -31,11 +31,11 @@ Add `C:\ReportGenerator` to environment variable `Path`.
 
 > _Code coverage summary:_
 > 
-> ![Screenshot showing coverage summary.](media/codeCoverageSummary.png)
+> ![Screenshot showing coverage summary.](./Media/codeCoverageSummary.png)
 > 
 > _Code coverage details:_
 > 
-> ![Screenshot showing coverage details.](media/codeCoverageDetails.png)
+> ![Screenshot showing coverage details.](./Media/codeCoverageDetails.png)
 
 ### **Set-DirectoryStructure**
 
