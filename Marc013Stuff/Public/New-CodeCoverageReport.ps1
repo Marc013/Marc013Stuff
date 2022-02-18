@@ -18,6 +18,9 @@ function New-CodeCoverageReport {
     .PARAMETER ReportType
     Code coverage output format and scope.
 
+    Allowed values are:
+    Badges, Clover, Cobertura, CsvSummary, Html, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, Xml, XmlSummary
+
     .PARAMETER ReportTitle
     Title of the code coverage report.
 
