@@ -37,6 +37,11 @@
     },
     "MD025": false
   },
+  "powershell.helpCompletion": "BlockComment",
+  "powershell.scriptAnalysis.enable": true,
+  "[powershell]": {
+    "editor.tabSize": 4
+  },
   "[markdown]": {
     "editor.defaultFormatter": "yzhang.markdown-all-in-one",
     "files.trimTrailingWhitespace": false
