@@ -7,7 +7,7 @@
     RootModule        = 'Marc013Stuff.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.3.0'
+    ModuleVersion     = '0.3.1'
 
     # ID used to uniquely identify this module
     GUID              = 'ca188666-a48a-4cd7-81e4-5a126044f086'

@@ -9,27 +9,25 @@ function Set-DirectoryStructure {
         Existing files are not recreated, only new files defined in the JSON are created.
 
         When specifying a source path that contains files mentioned in the JSON directory structure template file or object, these files are copied to their specified location.
+        The destination and source relative path must be the same!
 
-        A JSON directory template example is availble in './Example/ExampleDirectoryStructure.json'.
-        In this same directory dummy file 'file1.txt' is available for demo purposes of parameter -SourcePath.
+        When specifying "all" in the "files" section the content of the source directory will be recursively copied to the destination directory.
+
+        A JSON directory template example is available in './Example/ExampleDirectoryStructure.json'.
 
     .PARAMETER TemplateFile
-        JSON directory template file path (e.g. "./template/project-x.json")
+        JSON directory template file path
 
     .PARAMETER TemplateObject
-        JSON directory template object.
+        JSON directory template object
 
     .PARAMETER DestinationPath
-        Path in where the directories and files are to be created or updated.
-        This path must exist prior to running this function.
+        Path in where the directories and files are to be created or updated
+        This path must exist prior to running this function
 
     .PARAMETER SourcePath
-        Path in where source files are located that you want to copy into the directory structure.
-        The file name within the source path and JSON directory template file must be a 100% match.
-
-    .PARAMETER Depth
-        JSON directory template depth.
-        This value is only required when you provide a template file of which the depth is greater then 100.
+        Path in where source files are located that you want to copy into the directory structure
+        The file name within the source path and JSON directory template file must be a 100% match
 
     .EXAMPLE
         Set-DirectoryStructure -TemplateFile .\Example\ExampleDirectoryStructure.json -DestinationPath C:\Project-X
@@ -37,7 +35,7 @@ function Set-DirectoryStructure {
         This command will create a directory structure in folder C:\Project-X as specified in JSON file ExampleDirectoryStructure.json.
 
     .EXAMPLE
-        $DirectoryStructureObject = Get-Content -Path ..\Example\ExampleDirectoryStructure.json -Raw | ConvertFrom-Json -Depth 100
+        $DirectoryStructureObject = Get-Content -Path ..\Example\ExampleDirectoryStructure.json -Raw | ConvertFrom-Json
         Set-DirectoryStructure -TemplateObject DirectoryStructureObject -DestinationPath C:\Project-X
 
         This command will create a directory structure in folder C:\Project-X as specified in JSON object $DirectoryStructureObject
@@ -54,16 +52,16 @@ function Set-DirectoryStructure {
     param (
         [Parameter(
             Mandatory = $true,
-            HelpMessage = 'JSON directory template file path (e.g. "./template/project-x.json")',
+            HelpMessage = 'JSON directory template file path',
             ParameterSetName = 'TemplateFile'
         )]
         [string]$TemplateFile,
         [Parameter(
             Mandatory = $true,
-            HelpMessage = "JSON directory template object",
+            HelpMessage = 'JSON directory template object',
             ParameterSetName = 'TemplateObject'
         )]
-        [PSCustomObject]$TemplateObject,
+        [object]$TemplateObject,
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'Path in where the directories and files are to be created or updated'
@@ -74,77 +72,73 @@ function Set-DirectoryStructure {
             HelpMessage = 'Path in where source files are located that you want to copy into the directory structure'
         )]
         [AllowEmptyString()]
-        [string]$SourcePath = $null,
-        [Parameter(
-            Mandatory = $false,
-            HelpMessage = 'JSON directory template depth'
-        )]
-        [int]$Depth = 100
+        [string]$SourcePath = $null
     )
-    [char]$Separator = [System.IO.Path]::DirectorySeparatorChar
-    [string]$DestinationPath = $DestinationPath.TrimEnd($Separator)
+    [string]$DestinationPath = $DestinationPath.Replace('\', '/').TrimEnd('/')
+    [string]$SourcePath = $SourcePath.Replace('\', '/')
 
     if ($TemplateFile) {
         Write-Verbose -Message "Getting content of directory structure template file '$TemplateFile'"
-        $Data = (Get-Content -Path $TemplateFile -Raw | ConvertFrom-Json -Depth $Depth).directories
+        [object]$Data = (Get-Content -Path $TemplateFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop).directories
     }
     else {
-        Write-Verbose -Message 'Using directory structure template object'
-        $Data = ($TemplateObject).directories
+        # Write-Verbose -Message 'Using directory structure template object'
+        [object]$Data = ($TemplateObject).directories
 
-        if ([string]::IsNullOrWhiteSpace($Data)) {
-            $Data = $TemplateObject
+        if ((-not $Data.directory)) { #-or ([string]::IsNullOrWhiteSpace($Data)) -or ([string]::IsNullOrEmpty($Data))) {
+            [object]$Data = $TemplateObject
         }
     }
 
     foreach ($Directory in $Data.directory) {
-        $DirectoryName = $Directory.name
-        $Directories = $Directory.directories
-        $Files = $Directory.files
-        $FilePath = $DestinationPath
+        [string]$DirectoryName = $Directory.name
+        [object]$Directories = $Directory.directories
+        [object]$Files = $Directory.files
+        [string]$FilePath = $DestinationPath
 
         if ($DirectoryName) {
-            Write-Verbose -Message "Creating directory '$FilePath$Separator$DirectoryName'"
+            Write-Verbose -Message "Creating directory '$FilePath/$DirectoryName'"
             New-Item -Path $FilePath -Name $DirectoryName -ItemType Directory -Force | Out-Null
         }
 
         if ($Files -or $Directories) {
-            $FilePath = ("$DestinationPath$Separator$DirectoryName").TrimEnd($Separator)
+            [string]$FilePath = ("$DestinationPath/$DirectoryName").TrimEnd('/')
             Write-Verbose -Message "Setting FilePath to '$FilePath'"
+
+            [string]$SourceDirPath = "$SourcePath/$DirectoryName"
         }
 
         if ($Files) {
             foreach ($File in $Files) {
-                [string]$DestinatonFilePath = "$FilePath$Separator$File"
-                [string]$SourceFilePath = "$SourcePath$Separator$File"
+                [string]$DestinationFilePath = "$FilePath/$File"
+                [string]$SourceFilePath = "$SourceDirPath/$File"
 
-                if (Test-Path -Path "$DestinatonFilePath") {
-                    Write-Verbose -Message "File '$DestinatonFilePath' already present"
+                if ($File -eq 'all') {
+                    Write-Verbose "Copy all from '$SourceDirPath' to '$FilePath'"
+                    Copy-Item -Path "$SourceDirPath/*" -Destination $FilePath -Recurse -Force -ErrorAction Stop
+                }
+                elseif (Test-Path -Path "$DestinationFilePath") {
+                    Write-Verbose -Message "File '$DestinationFilePath' already present"
                 }
                 elseif (Test-Path -Path $SourceFilePath) {
                     Write-Verbose "Copying file '$SourceFilePath' to '$FilePath'"
-                    Copy-Item -Path $SourceFilePath -Destination $DestinationPath -Force -ErrorAction Stop
+                    Copy-Item -Path $SourceFilePath -Destination $FilePath -Force -ErrorAction Stop
                 }
                 else {
-                    Write-Verbose -Message "Creating file '$DestinatonFilePath'"
+                    Write-Verbose -Message "Creating file '$DestinationFilePath'"
                     New-Item -Path $FilePath -Name $File -ItemType File | Out-Null
                 }
             }
         }
 
         if ($Directories) {
-            Write-Verbose -Message "Creating child directory(s)"
-            Set-DirectoryStructure -TemplateObject $Directories -DestinationPath $FilePath -Depth $Depth -SourcePath $SourcePath -ErrorAction stop
-        }
-        else {
-            if ($FilePath.TrimEnd($Separator) -ne $DestinationPath.TrimEnd($Separator)) {
-                $ParentPath = $FilePath.Substring(0, $FilePath.lastIndexOf($Separator))
-                Write-Verbose -Message "Setting FilePath to parent '$ParentPath'"
-            }
+            Write-Verbose -Message 'Creating child directory(s)'
+            Set-DirectoryStructure -TemplateObject $Directories -DestinationPath $FilePath -SourcePath $SourceDirPath -ErrorAction stop
         }
     }
-    $FunctionCalled = $(Get-PSCallStack | Where-Object { $PSItem.Command -eq 'Set-DirectoryStructure' }).count
+
+    [int]$FunctionCalled = $(Get-PSCallStack | Where-Object -FilterScript { $PSItem.Command -eq 'Set-DirectoryStructure' }).count
     if ($FunctionCalled -le 1) {
-        Write-Host "Directory structure creation completed"
+        Write-Host 'Directory structure creation completed'
     }
 }
