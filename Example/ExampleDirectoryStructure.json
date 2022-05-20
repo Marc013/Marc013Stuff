@@ -1,5 +1,5 @@
 {
-  "$schema": "../Marc013Stuff/Public/directory.schema.json",
+  "$schema": "../Schema/directory.schema.json",
   "directories": [
     {
       "directory": {
