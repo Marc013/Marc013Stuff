@@ -1,0 +1,53 @@
+{
+  "$id": "http://example.com/schemas/directories",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "First description!",
+  "properties": {
+    "directories": {
+      "description": "Objects of directories and files",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/directory"
+      }
+    }
+  },
+  "required": [
+    "directories"
+  ],
+  "definitions": {
+    "directory": {
+      "$id": "/schemas/directory",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "directory": {
+          "description": "Directory setup",
+          "type": "object",
+          "properties": {
+            "files": {
+              "description": "File name(s) or \"all\"",
+              "type": "array"
+            },
+            "name": {
+              "description": "Single directory name",
+              "type": "string"
+            },
+            "directories": {
+              "description": "Objects of child directories",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/directory"
+              }
+            }
+          },
+          "required": [
+            "name"
+          ]
+        }
+      }
+    }
+  }
+}

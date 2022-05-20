@@ -1,7 +1,9 @@
 {
+  "$schema": "../Marc013Stuff/Public/directory.schema.json",
   "directories": [
     {
       "directory": {
+        "name": "level1a",
         "files": [
           "file1.txt",
           "file2.txt"
@@ -10,14 +12,14 @@
     },
     {
       "directory": {
-        "name": "level1a",
+        "name": "level1b",
         "files": [
           "file3.txt"
         ],
         "directories": [
           {
             "directory": {
-              "name": "level2a",
+              "name": "level1b-1",
               "files": [
                 "file4.txt"
               ]
@@ -25,11 +27,11 @@
           },
           {
             "directory": {
-              "name": "level2b",
+              "name": "level1b-2",
               "directories": [
                 {
                   "directory": {
-                    "name": "level3a",
+                    "name": "level1b-2-1",
                     "files": [
                       "all"
                     ]
@@ -43,7 +45,7 @@
     },
     {
       "directory": {
-        "name": "level1b",
+        "name": "level1c",
         "files": [
           "file6.txt",
           "file7.txt"
