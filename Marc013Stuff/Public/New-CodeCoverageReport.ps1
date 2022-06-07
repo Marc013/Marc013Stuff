@@ -100,7 +100,7 @@ function New-CodeCoverageReport {
             HelpMessage = 'Define this switch to show the report.')]
         [switch]$ShowReport
     )
-    #Requires -Modules @{ ModuleName='Pester'; ModuleVersion='5.3.0' }
+    #Requires -Modules @{ ModuleName='Pester'; ModuleVersion='5.3.3' }
 
     Assert-HelperFunction
 
