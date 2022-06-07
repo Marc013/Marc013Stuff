@@ -1,6 +1,9 @@
 {
+  "azure.cloud": "AzureCloud",
   "editor.formatOnSave": true,
+  "editor.insertSpaces": true,
   "editor.renderWhitespace": "all",
+  "editor.tabSize": 2,
   "editor.trimAutoWhitespace": true,
   "files.associations": {
     "**/pipelines/*.yaml": "azure-pipelines",
@@ -31,19 +34,21 @@
       "url": "http://json.schemastore.org/vss-extension"
     }
   ],
+  "markdown.extension.tableFormatter.enabled": true,
   "markdownlint.config": {
     "MD007": {
       "indent": 4
     },
-    "MD025": false
-  },
-  "powershell.helpCompletion": "BlockComment",
-  "powershell.scriptAnalysis.enable": true,
-  "[powershell]": {
-    "editor.tabSize": 4
+    "MD025": false,
+    "MD033": false
   },
   "[markdown]": {
     "editor.defaultFormatter": "yzhang.markdown-all-in-one",
     "files.trimTrailingWhitespace": false
+  },
+  "powershell.scriptAnalysis.enable": true,
+  "powershell.helpCompletion": "BlockComment",
+  "[powershell]": {
+    "editor.tabSize": 4
   }
 }
