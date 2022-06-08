@@ -19,7 +19,7 @@ function New-CodeCoverageReport {
     Code coverage output format and scope.
 
     Allowed values are:
-    Badges, Clover, Cobertura, CsvSummary, Html, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, Xml, XmlSummary
+    Badges, Clover, Cobertura, CsvSummary, Html, Html_Dark, Html_Light, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlInline_AzurePipelines_Light, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MarkdownSummary, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, Xml, XmlSummary
 
     .PARAMETER ReportTitle
     Title of the code coverage report.
@@ -86,10 +86,12 @@ function New-CodeCoverageReport {
         [Parameter(
             Mandatory = $false,
             HelpMessage = 'Code coverage output format and scope.')]
-        [ValidateSet('Badges', 'Clover', 'Cobertura', 'CsvSummary', 'Html', 'HtmlChart',
-            'HtmlInline', 'HtmlInline_AzurePipelines', 'HtmlInline_AzurePipelines_Dark',
-            'HtmlSummary', 'JsonSummary', 'Latex', 'LatexSummary', 'lcov', 'MHtml',
-            'PngChart', 'SonarQube', 'TeamCitySummary', 'TextSummary', 'Xml', 'XmlSummary')]
+        [ValidateSet('Badges', 'Clover', 'Cobertura', 'CsvSummary', 'Html', 'Html_Dark',
+            'Html_Light', 'HtmlChart', 'HtmlInline', 'HtmlInline_AzurePipelines',
+            'HtmlInline_AzurePipelines_Dark', 'HtmlInline_AzurePipelines_Light',
+            'HtmlSummary', 'JsonSummary', 'Latex', 'LatexSummary', 'lcov',
+            'MarkdownSummary', 'MHtml', 'PngChart', 'SonarQube', 'TeamCitySummary',
+            'TextSummary', 'Xml', 'XmlSummary')]
         [string[]]$ReportType = 'Html',
         [Parameter(
             Mandatory = $false,
