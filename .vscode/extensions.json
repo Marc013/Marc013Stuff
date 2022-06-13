@@ -1,5 +1,7 @@
 {
   "recommendations": [
+    "ms-azure-devops.azure-pipelines",
+    "msazurermtools.azurerm-vscode-tools",
     "davidanson.vscode-markdownlint",
     "ms-vscode.powershell",
     "yzhang.markdown-all-in-one"
