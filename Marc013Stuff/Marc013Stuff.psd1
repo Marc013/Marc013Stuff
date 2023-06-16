@@ -7,7 +7,7 @@
     RootModule        = 'Marc013Stuff.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.3.1'
+    ModuleVersion     = '0.5.1'
 
     # ID used to uniquely identify this module
     GUID              = 'ca188666-a48a-4cd7-81e4-5a126044f086'
@@ -26,7 +26,9 @@
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
+        'Add-NTFSPermission',
         'New-CodeCoverageReport',
+        'Remove-NTFSPermission',
         'Set-DirectoryStructure'
     )
 
