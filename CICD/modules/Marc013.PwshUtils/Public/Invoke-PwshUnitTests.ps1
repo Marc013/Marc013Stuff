@@ -5,15 +5,52 @@ function Invoke-PwshUnitTests {
 
     .DESCRIPTION
         Invoke-PwshUnitTests runs any PowerShell Pester unit test located in the provided path.
-        The test results and code coverage will be stored in the provided output directory in the tests path.
+        Test results and code coverage will be stored as XML file in the provided output directory in the tests path.
 
-    .NOTES
-        Information or caveats about the function e.g. 'This function is not supported in Linux'
-    .LINK
-        Specify a URI to a help page, this will show when Get-Help -Online is used.
+        Expected directory structure:
+
+        <repo>/modules
+        └───myModule
+            │   myModule.psd1
+            │   myModule.psm1
+            │
+            ├───Private
+            │       Get-PrivateFunction1.ps1
+            │       Get-PrivateFunction2.ps1
+            │
+            └───Public
+                    New-PublicFunction1.ps1
+                    New-PublicFunction2.ps1
+
+        <repo>/tests
+        └───myModule
+            ├───Private
+            │       Get-PrivateFunction1.tests.ps1
+            │       Get-PrivateFunction2.tests.ps1
+            │
+            └───Public
+                    New-PublicFunction1.tests.ps1
+                    New-PublicFunction2.tests.ps1
+
+    .PARAMETER Path
+        Provide the path of the Pester tests directory or files
+
+    .PARAMETER OutputDirectory
+        Provide the directory name where the Pester test results are to be placed
+
     .EXAMPLE
-        Test-MyTestFunction -Verbose
-        Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
+        Invoke-PwshUnitTests -Path <repo>/tests/myModule -OutputDirectory results
+
+        This command will run all Pester tests (*.tests.ps1) present in the provided path and create result files 'CoveragePester.xml' and 'ResultsPester.xml' in path <repo>/tests/myModule/results.
+        When any pwsh function is does not have any unit tests the code coverage of that function will be reported as 0.
+
+    .EXAMPLE
+        Invoke-PwshUnitTests -Path <repo>/tests/myModule/Public/New-PublicFunction1.tests.ps1, <repo>/tests/myModule/Public/New-PublicFunction2.tests.ps1 -OutputDirectory results -Verbose
+
+        This command will only run the tests and code coverage of the files provided in parameter Path.
+        Result files 'CoveragePester.xml' and 'ResultsPester.xml' are saved in path <repo>/tests/myModule/results.
+
+        The Pester configuration is presented as JSON output as parameter Verbose is provided.
     #>
     #Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.4.1' }
     [CmdletBinding(PositionalBinding = $false)]
