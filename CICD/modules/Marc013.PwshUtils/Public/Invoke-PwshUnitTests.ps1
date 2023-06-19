@@ -20,7 +20,7 @@ function Invoke-PwshUnitTests {
     [OutputType([Hashtable])]
     param (
         [Parameter(
-            HelpMessage = 'Provide the path of the directory containing the Pester tests',
+            HelpMessage = 'Provide the path of the Pester tests directory or files',
             Mandatory = $true
         )]
         [ValidateScript(
@@ -33,7 +33,7 @@ function Invoke-PwshUnitTests {
                 }
             }
         )]
-        [System.IO.DirectoryInfo]$PathPesterTests,
+        [System.IO.DirectoryInfo[]]$Path,
         [Parameter(
             HelpMessage = 'Provide the directory name where the Pester test results are to be placed',
             Mandatory = $true
@@ -42,20 +42,28 @@ function Invoke-PwshUnitTests {
     )
     Set-Variable -Name ErrorActionPreference -Value Stop
 
-    $testsFiles = Get-ChildItem -Path $PathPesterTests -Filter *.tests.ps1 -Recurse -Depth 4 -File
-    if ($testsFiles.Count -le 0) {
-        throw "No PowerShell tests files found at '$PathPesterTests'"
+
+    if (Test-Path -Path $Path -PathType Container) {
+        $testsFiles = Get-ChildItem -Path $Path -Filter *.tests.ps1 -Recurse -Depth 4 -File
+    }
+    else {
+        [System.IO.FileInfo[]]$testsFiles = $Path.FullName
     }
 
-    [System.IO.DirectoryInfo]$OutputPath = "$PathPesterTests/$OutputDirectory"
-    if (-not ($OutputPath)) {
-        New-Item -Path $OutputPath -ItemType Directory -Force | Out-Null
+    if ($testsFiles.Count -le 0) {
+        throw "No PowerShell tests files found at '$Path'"
     }
 
     $pwshModulePath = $testsFiles[0].DirectoryName.Replace('tests', 'modules').Replace('Private', '').Replace('Public', '')
 
+    [System.IO.DirectoryInfo]$OutputPath = "$pwshModulePath/$OutputDirectory"
+
+    if (-not ($OutputPath)) {
+        New-Item -Path $OutputPath -ItemType Directory -Force | Out-Null
+    }
+
     $Configuration = New-PesterConfiguration
-    $Configuration.Run.Path = $PathPesterTests.FullName
+    $Configuration.Run.Path = $Path.FullName
     $Configuration.CodeCoverage.Enabled = $true
     $Configuration.CodeCoverage.OutputPath = "$OutputPath/CoveragePester.xml"
     $Configuration.CodeCoverage.Path = @("$pwshModulePath/*.ps*1", "$pwshModulePath/**/*.ps*1")
@@ -70,6 +78,6 @@ function Invoke-PwshUnitTests {
 
     [ordered]@{
         CodeCoverageReport = "$OutputPath/CoveragePester.xml"
-        UnitTestsReport     = "$OutputPath/ResultsPester.xml"
+        UnitTestsReport    = "$OutputPath/ResultsPester.xml"
     }
 }
