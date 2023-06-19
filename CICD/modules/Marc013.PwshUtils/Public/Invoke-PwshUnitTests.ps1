@@ -42,11 +42,12 @@ function Invoke-PwshUnitTests {
     )
     Set-Variable -Name ErrorActionPreference -Value Stop
 
-
-    if (Test-Path -Path $Path -PathType Container) {
+    if (Test-Path -Path $Path[0] -PathType Container) {
+        $isContainer = $true
         $testsFiles = Get-ChildItem -Path $Path -Filter *.tests.ps1 -Recurse -Depth 4 -File
     }
     else {
+        $isContainer = $false
         [System.IO.FileInfo[]]$testsFiles = $Path.FullName
     }
 
@@ -55,6 +56,19 @@ function Invoke-PwshUnitTests {
     }
 
     $pwshModulePath = $testsFiles[0].DirectoryName.Replace('tests', 'modules').Replace('Private', '').Replace('Public', '')
+
+    $codeCoveragePath = [System.Collections.ArrayList]::new()
+
+    if ($isContainer) {
+        [Void]$codeCoveragePath.Add("$pwshModulePath/*.ps*1")
+        [Void]$codeCoveragePath.Add("$pwshModulePath/**/*.ps*1")
+    }
+    else {
+        $testsFiles | ForEach-Object -Process {
+            $testsFile = $PSItem.FullName.Replace('.tests.ps1', '.ps1').Replace('tests', 'modules')
+            [Void]$codeCoveragePath.Add($testsFile)
+        }
+    }
 
     [System.IO.DirectoryInfo]$OutputPath = "$pwshModulePath/$OutputDirectory"
 
@@ -66,13 +80,15 @@ function Invoke-PwshUnitTests {
     $Configuration.Run.Path = $Path.FullName
     $Configuration.CodeCoverage.Enabled = $true
     $Configuration.CodeCoverage.OutputPath = "$OutputPath/CoveragePester.xml"
-    $Configuration.CodeCoverage.Path = @("$pwshModulePath/*.ps*1", "$pwshModulePath/**/*.ps*1")
+    $Configuration.CodeCoverage.Path = $codeCoveragePath
     $Configuration.TestResult.Enabled = $true
     $Configuration.TestResult.OutputFormat = 'NUnitXml'
     $Configuration.TestResult.OutputPath = "$OutputPath/ResultsPester.xml"
     $Configuration.TestResult.TestSuiteName = 'GOAT unit testing results'
     $Configuration.Should.ErrorAction = 'Continue'
     $Configuration.Output.Verbosity = 'Detailed'
+
+    Write-Verbose "Pester config: $($Configuration | ConvertTo-Json -Depth 100)"
 
     Invoke-Pester -Configuration $Configuration
 
