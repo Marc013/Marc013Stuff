@@ -78,14 +78,18 @@ function Invoke-PwshUnitTests {
         [String]$OutputDirectory
     )
     Set-Variable -Name ErrorActionPreference -Value Stop
+    Write-Host "Path: '$($Path.FullName)" -ForegroundColor DarkCyan ## TEST
 
     if (Test-Path -Path $Path[0] -PathType Container) {
         $isContainer = $true
         $testsFiles = Get-ChildItem -Path $Path -Filter *.tests.ps1 -Recurse -Depth 4 -File
+        Write-Host "isContainer: '$isContainer'" -ForegroundColor DarkCyan ## TEST
+        Write-Host "testsFiles: '$($testsFiles.FullName)'" -ForegroundColor DarkCyan ## TEST
     }
     else {
         $isContainer = $false
         [System.IO.FileInfo[]]$testsFiles = $Path.FullName
+        Write-Host "isContainer: '$isContainer'" -ForegroundColor DarkCyan ## TEST
     }
 
     if ($testsFiles.Count -le 0) {
@@ -143,9 +147,16 @@ function Invoke-PwshUnitTests {
 
     [System.IO.DirectoryInfo]$OutputPath = "$pwshModulePath/$OutputDirectory"
 
-    if (-not ($OutputPath)) {
+    Write-Host "creating path '$($OutputPath.FullName)' ?" -ForegroundColor DarkYellow ## TEST
+    Write-Host "Exists? '$(Test-Path -Path $OutputPath)'" -ForegroundColor DarkYellow ## TEST
+    if (-not (Test-Path -Path $OutputPath)) {
         New-Item -Path $OutputPath -ItemType Directory -Force | Out-Null
+        Write-Host "Created path '$($OutputPath.FullName)'" -ForegroundColor DarkYellow ## TEST
     }
+    else {
+        Write-Host 'NO' -ForegroundColor DarkYellow ## TEST
+    }
+    Write-Host "path created?'" -ForegroundColor DarkYellow ## TEST
 
     $Configuration = New-PesterConfiguration
     $Configuration.Run.Path = $Path.FullName
