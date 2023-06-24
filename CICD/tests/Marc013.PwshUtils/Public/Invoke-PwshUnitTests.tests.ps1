@@ -3,6 +3,9 @@
 BeforeDiscovery {
     $moduleName = (Get-Item -Path (Split-Path -Path $PSScriptRoot -Parent)).Name
     Remove-Module -Name $moduleName -ErrorAction SilentlyContinue
+
+    [System.IO.FileInfo]$path = "$PSScriptRoot/../../../modules/$moduleName"
+    Write-Host "PATH '$("$($path.fullname)")'" -ForegroundColor DarkYellow ## TEST: testing
     Import-Module -Name "$PSScriptRoot/../../../modules/$moduleName" -Force -PassThru
 }
 

@@ -102,8 +102,22 @@ function Invoke-PwshUnitTests {
     }
     else {
         $testsFiles | ForEach-Object -Process {
-            $testsFile = $PSItem.FullName.Replace('.tests.ps1', '.ps1').Replace('tests', 'modules')
-            [Void]$codeCoveragePath.Add($testsFile)
+            $testsFile = $PSItem.FullName -ireplace '.tests.ps1', '.ps1' -ireplace 'tests', 'modules/*'
+            $testsFileModule = $testsFile -ireplace '.ps1', '.psm1'
+
+            Write-Host "testsFile: $($testsFile | Out-String)" -ForegroundColor DarkCyan
+            Write-Host "testsFileModule: $($testsFileModule | Out-String)" -ForegroundColor DarkCyan
+
+            if (Test-Path -Path $testsFile) {
+                [Void]$codeCoveragePath.Add($testsFile)
+            }
+            elseif (Test-Path -Path $testsFileModule) {
+                [Void]$codeCoveragePath.Add($testsFileModule)
+            }
+            else {
+                Write-Warning "Unable to locate expected file '$testsFile' or '$testsFileModule'. Code coverage will not be provided."
+            }
+
         }
     }
 
