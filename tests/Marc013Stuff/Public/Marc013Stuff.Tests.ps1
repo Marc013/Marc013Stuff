@@ -6,15 +6,6 @@ BeforeDiscovery {
     Import-Module -Name "$PSScriptRoot/../../../modules/$moduleName" -Force -PassThru
 }
 
-Describe 'Invoke-PwshUnitTests function test.' {
-
-    InModuleScope -ModuleName 'Marc013.PwshUtils' -ScriptBlock {
-
-        Context 'Validate business logic' {
-        }
-    }
-}
-
 Describe 'Module manifest' -Tag 'ModuleManifest' {
     Context 'Module manifest' {
         BeforeEach {
