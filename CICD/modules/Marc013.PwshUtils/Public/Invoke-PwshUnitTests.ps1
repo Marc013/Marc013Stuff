@@ -101,23 +101,43 @@ function Invoke-PwshUnitTests {
         [Void]$codeCoveragePath.Add("$pwshModulePath/**/*.ps*1")
     }
     else {
+        $count = 0
+
         $testsFiles | ForEach-Object -Process {
-            $testsFile = $PSItem.FullName -ireplace '.tests.ps1', '.ps1' -ireplace 'tests', 'modules/*'
-            $testsFileModule = $testsFile -ireplace '.ps1', '.psm1'
+            $count++
 
-            Write-Host "testsFile: $($testsFile | Out-String)" -ForegroundColor DarkCyan
-            Write-Host "testsFileModule: $($testsFileModule | Out-String)" -ForegroundColor DarkCyan
+            $isModuleManifest = Select-String -Pattern '(\.psd1|Test-ModuleManifest)' -Path $PSItem
 
-            if (Test-Path -Path $testsFile) {
-                [Void]$codeCoveragePath.Add($testsFile)
+            $fileExtension = $isModuleManifest ? '.psd1' : '.ps*'
+
+            $scriptName = "$($PSItem.Name.Split('.')[0])$fileExtension"
+
+            $modulePath = $PSItem.DirectoryName -ireplace 'tests', 'modules' -ireplace 'public' -ireplace 'private'
+
+            $testsFile = (Get-ChildItem -Path $modulePath -Filter $scriptName -Recurse -Depth 3).FullName
+
+            if ([string]::IsNullOrWhiteSpace($testsFile)) {
+                Write-Warning 'Unable to locate script file, code coverage will not be provided.'
             }
-            elseif (Test-Path -Path $testsFileModule) {
-                [Void]$codeCoveragePath.Add($testsFileModule)
+            elseif ($testsFile.Count -gt 1) {
+                $testsFile | ForEach-Object -Process {
+                    [Void]$codeCoveragePath.Add($PSItem)
+                }
             }
             else {
-                Write-Warning "Unable to locate expected file '$testsFile' or '$testsFileModule'. Code coverage will not be provided."
+                [Void]$codeCoveragePath.Add($testsFile)
             }
 
+            $debugOutput = [ordered]@{
+                loop             = $count
+                processed        = $PSItem.FullName
+                fileExtension    = $fileExtension
+                scriptName       = $scriptName
+                modulePath       = $modulePath
+                testsFile        = $testsFile
+                codeCoveragePath = $($codeCoveragePath | Out-String)
+            }
+            Write-Debug "$($debugOutput | ConvertTo-Json -Depth 2 | ConvertFrom-Json -Depth 2 | Out-String)"
         }
     }
 
@@ -139,7 +159,7 @@ function Invoke-PwshUnitTests {
     $Configuration.Should.ErrorAction = 'Continue'
     $Configuration.Output.Verbosity = 'Detailed'
 
-    Write-Verbose "Pester config: $($Configuration | ConvertTo-Json -Depth 100)"
+    Write-Debug "Pester config: $($Configuration | ConvertTo-Json -Depth 100)"
 
     Invoke-Pester -Configuration $Configuration
 
