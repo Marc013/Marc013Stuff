@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Marc013.PwshUtils</id>
+    <version>0.1.0</version>
+    <authors>Marc van Gorp</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/Marc013/Marc013Stuff</projectUrl>
+    <description>Generic PowerShell tools</description>
+    <copyright>#{year}</copyright>
+    <tags>PowerShell UnitTesting</tags>
+    <dependencies>
+      <group targetFramework=".NETStandard2.1">
+        <dependency id="SampleDependency" version="1.0.0" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

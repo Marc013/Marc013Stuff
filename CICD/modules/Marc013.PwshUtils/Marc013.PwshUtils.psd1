@@ -20,6 +20,12 @@
     # Copyright statement for this module
     Copyright            = '(c) 2023 Marc013. All rights reserved.'
 
+    # Description of the functionality provided by this module
+    Description          = 'Generic PowerShell tools'
+
+    # Minimum version of the PowerShell engine required by this module
+    PowerShellVersion    = '7.1'
+
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules      = @()
 
