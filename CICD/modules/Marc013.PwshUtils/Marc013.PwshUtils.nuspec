@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
-<package >
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
   <metadata>
     <id>Marc013.PwshUtils</id>
-    <version>1.0.0</version>
-    <authors>Marc013</authors>
+    <version>0.1.0</version>
+    <authors>Marc van Gorp</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
-    <!-- <icon>icon.png</icon> -->
+    <icon>None</icon>
     <projectUrl>https://github.com/Marc013/Marc013Stuff</projectUrl>
     <description>Generic PowerShell tools</description>
-    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
-    <copyright>$copyright$</copyright>
-    <tags>PowerShell UnitTesting</tags>
+    <releaseNotes>Building something nice</releaseNotes>
+    <copyright>#{year}</copyright>
+    <tags>Pester UnitTest</tags>
     <dependencies>
       <group targetFramework=".NETStandard2.1">
         <dependency id="SampleDependency" version="1.0.0" />
