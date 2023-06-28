@@ -53,7 +53,7 @@
             ProjectUri               = 'https://github.com/Marc013/Marc013Stuff'
 
             # A URL to an icon representing this module.
-            IconUri                  = 'None'
+            # IconUri                  = ''
 
             # ReleaseNotes of this module
             ReleaseNotes             = 'Building something nice'
