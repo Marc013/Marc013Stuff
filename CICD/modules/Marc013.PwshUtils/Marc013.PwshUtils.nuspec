@@ -6,7 +6,6 @@
     <authors>Marc van Gorp</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
-    <icon>None</icon>
     <projectUrl>https://github.com/Marc013/Marc013Stuff</projectUrl>
     <description>Generic PowerShell tools</description>
     <releaseNotes>Building something nice</releaseNotes>
