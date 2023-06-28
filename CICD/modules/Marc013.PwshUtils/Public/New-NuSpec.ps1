@@ -1,7 +1,7 @@
 function New-NuSpec {
     <#
     .SYNOPSIS
-        A short one-line action-based description, e.g. 'Tests if a function is valid'
+        Create NuGet package metadata file for PowerShell module.
 
     .DESCRIPTION
         New-NuSpec creates a NuGet package metadata file (.nuspec) of a PowerShell module.
@@ -12,12 +12,18 @@ function New-NuSpec {
         - Author
         - Description
 
-        Optional module manifest information (will be added to the NuGet metadata file when present):
+        Optional module manifest information will be added to the NuGet metadata file when present:
 
         - PrivateData.PSData.IconUri
         - PrivateData.PSData.ProjectUri
         - PrivateData.PSData.ReleaseNotes
         - PrivateData.PSData.Tags
+
+    .PARAMETER Path
+        Path to the module manifest (.psd1)
+
+    .PARAMETER License
+        License keyword
 
     .NOTES
         The blow URL might be helpful in choosing the appropriate license keyword,
@@ -25,8 +31,55 @@ function New-NuSpec {
         https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository
 
     .EXAMPLE
-        Test-MyTestFunction -Verbose
-        Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
+        New-NuSpec -Path C./myModule.psd1 -License 'MIT'
+
+        This command will generate a NuGet metadata file based on PowerShell module manifest file myModule.ps1. License will be set to MIT.
+
+        <?xml version="1.0" encoding="utf-8"?>
+        <package>
+        <metadata>
+            <id>myModule</id>
+            <version>1.0.0</version>
+            <authors>The Author</authors>
+            <requireLicenseAcceptance>false</requireLicenseAcceptance>
+            <license type="expression">MIT</license>
+            <projectUrl>https://github.com/myModules/myModule</projectUrl>
+            <description>Great module</description>
+            <releaseNotes>Greatness</releaseNotes>
+            <copyright>#{year}</copyright>
+            <tags>Tag1 Tag2</tags>
+            <dependencies>
+            <group targetFramework=".NETStandard2.1">
+                <dependency id="SampleDependency" version="1.0.0" />
+            </group>
+            </dependencies>
+        </metadata>
+        </package>
+
+    .EXAMPLE
+        New-NuSpec -Path C./myModule.psd1
+
+        This command will generate a NuGet metadata file based on PowerShell module manifest file myModule.ps1. No license will be set.
+
+        <?xml version="1.0" encoding="utf-8"?>
+        <package>
+        <metadata>
+            <id>myModule</id>
+            <version>1.0.0</version>
+            <authors>The Author</authors>
+            <requireLicenseAcceptance>false</requireLicenseAcceptance>
+            <projectUrl>https://github.com/myModules/myModule</projectUrl>
+            <description>Great module</description>
+            <releaseNotes>Greatness</releaseNotes>
+            <copyright>#{year}</copyright>
+            <tags>Tag1 Tag2</tags>
+            <dependencies>
+            <group targetFramework=".NETStandard2.1">
+                <dependency id="SampleDependency" version="1.0.0" />
+            </group>
+            </dependencies>
+        </metadata>
+        </package>
     #>
     [CmdletBinding(PositionalBinding = $false)]
     param (
