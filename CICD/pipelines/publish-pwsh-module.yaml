@@ -22,7 +22,7 @@ parameters:
 pool:
   vmImage: "ubuntu-latest"
 
-  stages:
+stages:
 #    - stage: codeValidation
 #      displayName: Code validation
 #
