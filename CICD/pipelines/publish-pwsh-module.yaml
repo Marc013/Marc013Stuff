@@ -1,0 +1,173 @@
+trigger: none
+
+parameters:
+  - name: modulePath
+    type: string
+    displayName: 'Relative path of the PowerShell module'
+
+  - name: artifactFeed
+    type: string
+    displayName: Artifact feed name (e.g., 'my-organization-scoped-feed', 'my-project/my-project-scoped-feed')
+
+  - name: versionOption
+    type: string
+    displayName: Version increment strategy
+    values:
+      - major
+      - minor
+      - patch
+      - custom
+    default: 'patch'
+
+pool:
+  vmImage: "ubuntu-latest"
+
+  stages:
+#    - stage: codeValidation
+#      displayName: Code validation
+#
+#      jobs:
+#        - job: unitTest
+#          displayName: Unit testing
+#          # condition: and(succeeded(), eq('${{ parameters.deployInfrastructure }}', 'true'))
+#
+#          # variables:
+#          #   location: "West Europe"
+#          #   bicepFilePath: '$(Build.SourcesDirectory)/infrastructure/deploy.bicep'
+#
+#          steps:
+#            - task: PowerShell@2 ## TODO: Implement Pester unit testing.
+#              displayName: Pester
+#              inputs:
+#                targetType: 'inline'
+#                script: |
+#                  Write-Host "##[section]Pester testing is to be implemented here."
+#                pwsh: true
+
+    - stage: Release
+      displayName: Release new pwsh module version
+
+      jobs:
+        - job: Release_pwsh_module
+          displayName: Release pwsh module
+
+          # variables:
+          #   storageAccountName: $[ stageDependencies.Infrastructure.Deploy.outputs['InfraVariables.storageAccountName'] ]
+
+          steps:
+            - checkout: self
+              persistCredentials:  true
+
+    #        - task: AzurePowerShell@5
+    #          displayName: Set module version
+    #          env:
+    #            FEED_PAT: $(feedPAT) # Pipeline secret variable containing the Azure DevOps PAT for querying the Azure Artifacts package
+    #          inputs:
+    #            azureSubscription: "${{ parameters.azureServiceConnection }}"
+    #            ScriptType: InlineScript
+    #            Inline: | ## TODO: Make it nice!!
+    #              Write-Host "##[debug]This task will determine the new version and add it to the manifest and create the NuSpec file"
+    #              # [string]$basePath = "$env:BUILD_REPOSITORY_LOCALPATH"
+    #              # [string]$organization = "${{ parameters.azureArtifactsOrganizationName }}"
+    #              # [securestring]$securePAT = ConvertTo-SecureString -String "${env:FEED_PAT}" -AsPlainText -Force
+    #              # if($securePAT.Length -ne 52) {
+    #              #   throw "Invalid PAT. Expected PATH length '52', got length $($securePAT.Length)."
+    #              # }
+    #              # Write-Host "##[command]Setting working directory to '$basePath'"
+    #              # Set-Location -Path $basePath
+    #              # $env:GIT_REDIRECT_STDERR = '2>&1'
+    #              # Write-Host "##[command]Configuring git user settings"
+    #              # git config --global user.email 'go-dloneplatform-au1@kpmg.com'
+    #              # git config --global user.name 'Global Cloud Enterprise Products Automation'
+    #              # Write-Host '##[command]Syncing local branch with remote'
+    #              # git pull origin main
+    #              # Write-Host '##[command]Checking out main branch'
+    #              # git checkout main
+    #              # [string]$fileName = 'Code-Validation'
+    #              # [string]$guid = 'cad42d09-1b4a-4f82-b5ee-6679a9079b2f'
+    #              # [string]$htmlFile =  "$basePath/documentation/gettingStarted/$fileName.html"
+    #              # [string]$markdownFile = "$basePath/wiki/Getting-Started/$fileName.md"
+    #              # [string[]]$filesToUpdate = "$basePath/versions.json", "$basePath/IaCCT.psd1", $markdownFile
+    #              # [hashtable]$packageVersionParameters = @{
+    #              #     PackageName      = "${{ variables.PackageName }}"
+    #              #     Guid             = $guid
+    #              #     DocumentPath     = $filesToUpdate
+    #              #     VersionIncrement = "${{ parameters.versionOption }}"
+    #              #     Organization     = $organization
+    #              #     FeedName         = "${{ parameters.azureArtifactsFeed }}"
+    #              #     SecurePAT        = $securePAT
+    #              #     ErrorAction      = 'Stop'
+    #              # }
+    #              # if ("${{ parameters.versionOption }}" -eq 'custom') {
+    #              #   $packageVersionParameters.Add('CustomVersion', "${{ parameters.CustomVersion }}")
+    #              # }
+    #              # Write-Host "##[command]Updating getting started documentation using arguments:`n$($packageVersionParameters | ConvertTo-Json)"
+    #              # [string]$newVersion = & "$basePath/tools/packageCreation/Set-PackageVersion.ps1" @packageVersionParameters
+    #              # if([string]::IsNullOrWhiteSpace($newVersion)){
+    #              #   throw 'Unable to determine the new package version.'
+    #              # }
+    #              # [string]$htmlTemplate = "$basePath/src/binaries/pandoc/templates/html/uikit.html"
+    #              # switch ($true) {
+    #              #     $isLinux {
+    #              #         [string]$pandoc = "$basePath/src/binaries/pandoc/Linux/pandoc"
+    #              #         chmod +x $pandoc
+    #              #     }
+    #              #     $isWindows {
+    #              #         [string]$pandoc = "$basePath/src/binaries/pandoc/Windows/pandoc.exe"
+    #              #     }
+    #              #     Default {
+    #              #         throw 'Unexpected OS. Expected Linux or Windows'
+    #              #     }
+    #              # }
+    #              # Write-Host "##[command]Creating html file '$htmlFile'"
+    #              # & $pandoc $markdownFile --standalone --toc --toc-depth=6 --template=$htmlTemplate --output=$htmlFile
+    #              # Write-Host "Publishing versions.json and adding blob SAS Url to IaCCT.psd1"
+    #              # [string]$storageAccountName = "$env:STORAGEACCOUNTNAME"
+    #              # if ([string]::IsNullOrWhiteSpace($storageAccountName)) {
+    #              #     $storageAccountName = "${{ parameters.storageAccountName }}"
+    #              # }
+    #              # [hashtable]$publishVersionsFileParameters = @{
+    #              #   StorageAccountName = $storageAccountName
+    #              #   ContainerName      = 'versioncontrol'
+    #              #   FilePath           = "$basePath/versions.json"
+    #              #   PowerShellDataFile = "$basePath/IaCCT.psd1"
+    #              # }
+    #              # & "$basePath/src/scripts/Publish-VersionsFileToStorageAccount.ps1" @publishVersionsFileParameters
+    #              # Write-Host '##[command]Adding updates to git staging area'
+    #              # git add -A
+    #              # Write-Host '##[command]Committing updates to git'
+    #              # git commit -m "Updated $packageName getting started documentation"
+    #              # Write-Host '##[command]Pushing changes to remote repo'
+    #              # git push origin
+    #              # Write-Host "##[command]Setting git tag version"
+    #              # git tag $newVersion
+    #              # Write-Host '##[command]Pushing git tag version to remote repo'
+    #              # git push --tags
+    #            azurePowerShellVersion: LatestVersion
+    #            pwsh: true
+
+            - task: NuGetCommand@2
+              displayName: Package module
+              inputs:
+                command: pack
+                packagesToPack: $(Build.Repository.LocalPath)/${{ parameters.modulePath }}/*.nuspec
+                packDestination: $(Build.ArtifactStagingDirectory)
+                versioningScheme: off
+                verbosityPack: 'Detailed' ## Detailed is the default option, it was set to: Normal
+
+    #        - task: PublishBuildArtifacts@1 ## TEST: Only required for testing. When testing done it can be removed
+    #          displayName: Publish module to pipeline
+    #          inputs:
+    #            PathtoPublish: $(Build.ArtifactStagingDirectory)
+    #            ArtifactName: testPackage
+    #            publishLocation: Container
+
+    #        - task: NuGetCommand@2
+    #          displayName: Push module to Artifacts feed
+    #          inputs:
+    #            command: 'push'
+    #            # packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg' ## THIS IS THE DEFAULT AND THUS NOT REQUIRED
+    #            nuGetFeedType: 'internal' ## THIS IS THE DEFAULT AND THUS NOT REQUIRED
+    #            publishVstsFeed: "${{ parameters.artifactFeed }}"
+    #            # allowPackageConflicts: true  ## This option is currently only available on Azure Pipelines and Windows agents.
+    #            verbosityPush: Detailed ## Detailed is the default option, it was set to: Normal

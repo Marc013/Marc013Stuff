@@ -102,6 +102,13 @@ function New-NuSpec {
             Mandatory = $false,
             HelpMessage = 'License keyword'
         )]
+        [ValidateSet(
+            'Apache-2.0',
+            'LGPL-2.0-only',
+            'MIT',
+            '(MIT)',
+            'FLTK-exception'
+        )]
         [string]$License
     )
 
@@ -112,8 +119,10 @@ function New-NuSpec {
 
     $xmlSettings = New-Object System.Xml.XmlWriterSettings
     $xmlSettings.Indent = $true
+    $xmlSettings.CloseOutput = $true
 
     $xmlWriter = [System.XML.XmlWriter]::Create($outputPath, $xmlSettings)
+
     $xmlWriter.WriteStartElement('package')
     $xmlWriter.WriteStartElement('metadata')
     $xmlWriter.WriteElementString('id', $moduleManifest.Name)
@@ -145,25 +154,25 @@ function New-NuSpec {
         $xmlWriter.WriteElementString('releaseNotes', $moduleManifest.ReleaseNotes)
     }
 
-    $xmlWriter.WriteElementString('copyright', '#{year}')
+    $xmlWriter.WriteElementString('copyright', $moduleManifest.Copyright)
 
     if ($moduleManifest.Tags) {
         $xmlWriter.WriteElementString('tags', $($moduleManifest.PrivateData.PSData.Tags -join ' '))
     }
 
-    $xmlWriter.WriteStartElement('dependencies')
-    $xmlWriter.WriteStartElement('group')
-    $xmlWriter.WriteAttributeString('targetFramework', '.NETStandard2.1')
-    $xmlWriter.WriteStartElement('dependency')
-    $xmlWriter.WriteAttributeString('id', 'SampleDependency')
-    $xmlWriter.WriteAttributeString('version', '1.0.0')
     $xmlWriter.WriteEndElement()
-    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteStartElement('files')
+    $xmlWriter.WriteStartElement('file')
+    $xmlWriter.WriteAttributeString('src', '**/*.*')
+    $xmlWriter.WriteAttributeString('target', '/')
+    $xmlWriter.WriteAttributeString('exclude', 'tests/**/*.*;.vscode/**/*.*;**/*.nupkg')
     $xmlWriter.WriteEndElement()
     $xmlWriter.WriteEndElement()
     $xmlWriter.WriteEndElement()
 
     $xmlWriter.Flush()
     $xmlWriter.Close()
+
+    Write-Output "Created '$outputPath'"
 }
 

@@ -38,6 +38,10 @@ function Invoke-PwshUnitTests {
     .PARAMETER OutputDirectory
         Provide the directory name where the Pester test results are to be placed
 
+    .NOTES
+        This function required Pester 5!
+        https://www.powershellgallery.com/packages/Pester
+
     .EXAMPLE
         Invoke-PwshUnitTests -Path <repo>/tests/myModule -OutputDirectory results
 
@@ -52,7 +56,6 @@ function Invoke-PwshUnitTests {
 
         The Pester configuration is presented as JSON output as parameter Verbose is provided.
     #>
-    #Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.4.1' }
     [CmdletBinding(PositionalBinding = $false)]
     [OutputType([Hashtable])]
     param (

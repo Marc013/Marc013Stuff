@@ -1,6 +1,6 @@
 @{
     # Script module or binary module file associated with this manifest.
-    RootModule           = 'Marc013.PwshUtils.psm1'
+    RootModule           = 'PwshUtils.psm1'
 
     # Version number of this module.
     ModuleVersion        = '0.1.0'
@@ -24,7 +24,7 @@
     Description          = 'Generic PowerShell tools'
 
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion    = '7.1'
+    PowerShellVersion    = '7.3'
 
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules      = @()
@@ -47,7 +47,7 @@
             )
 
             # A URL to the license for this module.
-            LicenseUri               = 'https://opensource.org/license/mit/'
+            LicenseUri               = 'https://raw.githubusercontent.com/Marc013/Marc013Stuff/main/LICENSE'
 
             # A URL to the main website for this project.
             ProjectUri               = 'https://github.com/Marc013/Marc013Stuff'

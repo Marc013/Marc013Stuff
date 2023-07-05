@@ -8,10 +8,10 @@ BeforeDiscovery {
 
 Describe 'Invoke-PwshUnitTests function test.' {
 
-    InModuleScope -ModuleName 'Marc013.PwshUtils' -ScriptBlock {
+    InModuleScope -ModuleName 'PwshUtils' -ScriptBlock {
 
         Context 'Validate business logic' {
-            BeforeAll -ScriptBlock {
+            BeforeAll -Scriptblock {
                 Mock -CommandName Test-Path -MockWith { return $true }
                 Mock -CommandName Get-ChildItem -MockWith { return $null }
                 Mock -CommandName Select-String -MockWith { return $null }
