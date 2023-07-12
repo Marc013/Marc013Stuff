@@ -77,8 +77,8 @@ stages:
     #              # Set-Location -Path $basePath
     #              # $env:GIT_REDIRECT_STDERR = '2>&1'
     #              # Write-Host "##[command]Configuring git user settings"
-    #              # git config --global user.email 'go-dloneplatform-au1@kpmg.com'
-    #              # git config --global user.name 'Global Cloud Enterprise Products Automation'
+    #              # git config --global user.email 'me@email.com'
+    #              # git config --global user.name 'This pipeline'
     #              # Write-Host '##[command]Syncing local branch with remote'
     #              # git pull origin main
     #              # Write-Host '##[command]Checking out main branch'
