@@ -13,14 +13,17 @@ PowerShell module with all kinds of miscellaneous goodies
     - Download the latest [release][4]
     - Requires [.NET Runtime][5]
 
+      ```PowerShell
+      winget install Microsoft.DotNet.Runtime.9
+      ```
+
 After downloading the latest release of the _ReportGenerator_ unzip the file. Depending on the version you downloaded you will get the following directory structure:
 
 ```text
-REPORTGENERATOR_5.0.4
+REPORTGENERATOR_5.4.3
 ├───net47
-├───net5.0
-├───net6.0
-└───netcoreapp3.1
+├───net8.0
+└───net9.0
 ```
 
 Create directory `C:\ReportGenerator` and copy the content of any of the _netxx_ directory (depending on the .Net Runtime version you have on your system).
